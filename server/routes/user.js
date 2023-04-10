@@ -3,22 +3,27 @@ const express = require('express');
 const router = express.Router();
 
 const { ActiveUser, db } = require('../database/db');
-const { YoutubeAPI } = require('./youtube');
+const YoutubeAPI = require('./youtube');
 
 router.get('/login', (req, res) => {
   res.send({ url: YoutubeAPI.authUrl });
 });
 
-// router.get('/is_logged', async (req, res) => {
-//   const { userId } = req.query;
-//   try {
-//     await YoutubeAPI.ensureLoggedIn(userId);
-//     res.send({authenticated: true});
-//   } catch (error) {
-//     console.log(error);
-//     res.send({authenticated: false});
-//   }
-// });
+router.get('/is_logged', async (req, res) => {
+  // console.log(YoutubeAPI)
+  const { uuid } = req.query;
+  try {
+    const user = await ActiveUser.findOne({ where: { id: uuid } });
+    if (user) {
+      res.send({authenticated: true});
+    } else {
+      res.send({authenticated: false});
+    }
+  } catch (error) {
+    console.log(error);
+    res.send({authenticated: false});
+  }
+});
 
 router.get('/logout', async (req, res) => {
   const { userId } = req.query;

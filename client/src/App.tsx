@@ -13,6 +13,7 @@ import { useGlobalContext } from "./global/store";
 
 // const ViewContainer = lazy(() => import("./views/ViewContainer"));
 const Index = lazy(() => import("./views/Index"));
+const Oauth = lazy(() => import("./views/Oauth"));
 
 // const Features = lazy(() => import("./views/Features"));
 // const Pricing = lazy(() => import("./views/Pricing"));
@@ -47,6 +48,7 @@ export default function App() {
         {/* <ViewContainer> */}
           <Routes>
             <Route path="/" component={Index} />
+            <Route path="/oauth" component={Oauth} />
             {/* <Route path="/*" component={Index} /> */}
             {/* <Route path='/features' component={Features} />
             <Route path='/pricing' component={Pricing} />

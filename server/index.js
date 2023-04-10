@@ -16,9 +16,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // const youtubeRoutes = require('./routes/youtube');
 // app.use('/youtube', youtubeRoutes);
-// const userRoutes = require('./routes/user');
+const userRoutes = require('./routes/user');
 const videoRoutes = require('./routes/video');
-// app.use('/user', userRoutes);
+app.use('/user', userRoutes);
 app.use('/video', videoRoutes);
 
 // const { pollAnalytics } = require('./routes/cron');

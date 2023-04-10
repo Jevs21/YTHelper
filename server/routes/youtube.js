@@ -26,7 +26,7 @@ const analytics = google.youtubeAnalytics({
 });
 
 // Load auth url
-module.exports.authUrl = oauth2Client.generateAuthUrl({
+exports.authUrl = oauth2Client.generateAuthUrl({
   access_type: 'offline',
   scope: [
     'https://www.googleapis.com/auth/youtube.force-ssl',
@@ -44,68 +44,68 @@ module.exports.authUrl = oauth2Client.generateAuthUrl({
 //     res.send('Error: ' + error.message);
 //   }
 // });
-module.exports.authenticate = async (code) => {
-  const { tokens } = await this.oauth2Client.getToken(code);
-  this.oauth2Client.setCredentials(tokens);
+exports.authenticate = async (code) => {
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
   return tokens;
 }
 
-class YoutubeAPI {
-  constructor() {
+// class YoutubeAPI {
+//   constructor() {
     
-  }
+//   }
 
   
 
-  async ensureLoggedIn(userId) {
-    // Set the credentials for the oauth2Client using the stored tokens
-    this.oauth2Client.setCredentials({
-      access_token: activeUser.access_token,
-      refresh_token: activeUser.refresh_token,
-      scope: activeUser.scope,
-      token_type: activeUser.token_type,
-      expiry_date: activeUser.expiry_date,
-    });
+//   async ensureLoggedIn(userId) {
+//     // Set the credentials for the oauth2Client using the stored tokens
+//     this.oauth2Client.setCredentials({
+//       access_token: activeUser.access_token,
+//       refresh_token: activeUser.refresh_token,
+//       scope: activeUser.scope,
+//       token_type: activeUser.token_type,
+//       expiry_date: activeUser.expiry_date,
+//     });
 
-    // Check if the access token is expired
-    if (this.oauth2Client.isTokenExpired()) {
-      // Refresh the access token
-      const refreshedTokens = await this.oauth2Client.refreshAccessToken();
-      const newTokens = refreshedTokens.res.data;
+//     // Check if the access token is expired
+//     if (this.oauth2Client.isTokenExpired()) {
+//       // Refresh the access token
+//       const refreshedTokens = await this.oauth2Client.refreshAccessToken();
+//       const newTokens = refreshedTokens.res.data;
 
-      // Update the stored tokens in the database
-      activeUser.access_token = newTokens.access_token;
-      activeUser.expiry_date = newTokens.expiry_date;
-      await activeUser.save();
-    }
-  }
+//       // Update the stored tokens in the database
+//       activeUser.access_token = newTokens.access_token;
+//       activeUser.expiry_date = newTokens.expiry_date;
+//       await activeUser.save();
+//     }
+//   }
 
-  async getChannelId() {
-    const response = await this.youtube.channels.list({
-      part: 'id',
-      mine: true
-    });
-    return response.data.items[0].id;
-  }
+//   async getChannelId() {
+//     const response = await this.youtube.channels.list({
+//       part: 'id',
+//       mine: true
+//     });
+//     return response.data.items[0].id;
+//   }
 
-  async getLatestUploads(count = 20) {
-    const channelId = await this.getChannelId();
-    const response = await this.youtube.search.list({
-      part: 'snippet',
-      channelId: channelId,
-      maxResults: count,
-      order: 'date',
-      type: 'video'
-    });
-    return response.data.items.map(item => ({
-      videoId: item.id.videoId,
-      title: item.snippet.title,
-      description: item.snippet.description,
-      publishedAt: item.snippet.publishedAt
-    }));
-  }
-}
+//   async getLatestUploads(count = 20) {
+//     const channelId = await this.getChannelId();
+//     const response = await this.youtube.search.list({
+//       part: 'snippet',
+//       channelId: channelId,
+//       maxResults: count,
+//       order: 'date',
+//       type: 'video'
+//     });
+//     return response.data.items.map(item => ({
+//       videoId: item.id.videoId,
+//       title: item.snippet.title,
+//       description: item.snippet.description,
+//       publishedAt: item.snippet.publishedAt
+//     }));
+//   }
+// }
 
-router.get('/')
+// router.get('/')
 
-module.exports = YoutubeAPI;
+// module.exports = YoutubeAPI;

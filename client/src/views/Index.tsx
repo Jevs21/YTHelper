@@ -4,23 +4,29 @@ import { createSignal, onMount, lazy } from "solid-js";
 import StagnantVideos from "../components/StagnantVideos";
 
 const Index = () => {
-  const { apiCall, navigate } = useGlobalContext();
+  const { apiCall, navigate, uuid } = useGlobalContext();
   const authButton = async () => {
     const res = await apiCall('/user/login');
     window.open(res.url, '_blank').focus();
   }
 
-  const checkAuth = async () => (await apiCall('/user/is_logged'));
+  const checkAuth = async () => (await apiCall('/user/is_logged', 'GET', { uuid: uuid() }));
   const [isAuth, setIsAuth] = createSignal(false);
   onMount(async () => {
-    checkAuth().then(res => {
-      setIsAuth(res.authenticated);
-    });
+    const res = await checkAuth();
+    setIsAuth(res.authenticated);
+    if (!res.authenticated) {
+      const redirect = await apiCall('/user/login');
+      window.open(redirect.url, '_blank').focus();
+    }
 
     setInterval(async () => {
-      checkAuth().then(res => {
-        setIsAuth(res.authenticated);
-      });
+      const res = await checkAuth();
+      setIsAuth(res.authenticated);
+      if (!res.authenticated) {
+        const redirect = await apiCall('/user/login');
+        window.open(redirect.url, '_blank').focus();
+      }
     }, 10000);
   });
 

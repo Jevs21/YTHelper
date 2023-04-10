@@ -6,6 +6,8 @@ interface ContextProps {
   setIsMobile: Setter<boolean>,
   prevRoute: Accessor<string>,
   setPrevRoute: Setter<string>,
+  uuid: Accessor<string>,
+  setUuid: Setter<string>,
   loadLocalStorage: Function,
   clearStore: Function,
   setStore: Function,
@@ -23,6 +25,7 @@ export function GlobalContextProvider(props) {
   
   const [prevRoute, setPrevRoute]   = createSignal('');
   const [isMobile, setIsMobile]     = createSignal(false);
+  const [uuid, setUuid]             = createSignal('');
 
   const navigate = (params) => {
     setPrevRoute(location.pathname);
@@ -107,6 +110,7 @@ export function GlobalContextProvider(props) {
 	<GlobalContext.Provider value={{ 
       isMobile, setIsMobile,
       prevRoute, setPrevRoute,
+      uuid, setUuid,
       clearStore, setStore, loadLocalStorage,
       apiCall, 
       navigate

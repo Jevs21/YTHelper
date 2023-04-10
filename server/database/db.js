@@ -32,4 +32,5 @@ module.exports = {
   init,
   YoutubeVideo,
   YoutubeVideoViewLog,
+  ActiveUser,
 };
