@@ -47,6 +47,7 @@ export default function App() {
         {/* <ViewContainer> */}
           <Routes>
             <Route path="/" component={Index} />
+            {/* <Route path="/*" component={Index} /> */}
             {/* <Route path='/features' component={Features} />
             <Route path='/pricing' component={Pricing} />
             <Route path='/about' component={About} />

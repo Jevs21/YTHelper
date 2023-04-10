@@ -24,6 +24,7 @@ class ActiveUser extends Model {
           type: DataTypes.BIGINT,
           allowNull: false,
         },
+
       },
       { sequelize, modelName: 'ActiveUser' }
     );

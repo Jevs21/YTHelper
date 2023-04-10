@@ -1,50 +1,63 @@
-// const express = require('express');
-// const session = require('express-session');
+const express = require('express');
+const router = express.Router();
 
 const dotenv = require('dotenv');
 dotenv.config();
 const { google } = require('googleapis');
 
-// const router = express.Router();
+// Load dotenv
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = process.env.REDIRECT_URI;
 
+// Load the OAuth2 client and apis
+const oauth2Client = new google.auth.OAuth2(
+  clientId,
+  clientSecret,
+  redirectUri
+);
+const youtube = google.youtube({
+  version: 'v3',
+  auth: oauth2Client
+});
+const analytics = google.youtubeAnalytics({
+  version: 'v2',
+  auth: oauth2Client
+});
+
+// Load auth url
+module.exports.authUrl = oauth2Client.generateAuthUrl({
+  access_type: 'offline',
+  scope: [
+    'https://www.googleapis.com/auth/youtube.force-ssl',
+    'https://www.googleapis.com/auth/yt-analytics.readonly',
+    'https://www.googleapis.com/auth/youtube.readonly'
+  ]
+});
+
+// router.get('/authenticate', async (req, res) => {
+//   const { code } = req.query;
+//   try {
+//     const tokens = await this.oauth2Client.getToken(code);
+//     res.send(tokens);
+//   } catch (error) {
+//     res.send('Error: ' + error.message);
+//   }
+// });
+module.exports.authenticate = async (code) => {
+  const { tokens } = await this.oauth2Client.getToken(code);
+  this.oauth2Client.setCredentials(tokens);
+  return tokens;
+}
+
 class YoutubeAPI {
-  constructor(UserModel) {
-    this.oauth2Client = new google.auth.OAuth2(
-      clientId,
-      clientSecret,
-      redirectUri
-    );
-    this.youtube = google.youtube({
-      version: 'v3',
-      auth: this.oauth2Client
-    });
-    this.User = UserModel;
-    this.authUrl = this.oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: [
-        'https://www.googleapis.com/auth/youtube.force-ssl',
-        'https://www.googleapis.com/auth/yt-analytics.readonly',
-        'https://www.googleapis.com/auth/youtube.readonly'
-      ]
-    });
+  constructor() {
+    
   }
 
-  async authenticate(code) {
-    const { tokens } = await this.oauth2Client.getToken(code);
-    this.oauth2Client.setCredentials(tokens);
-    return tokens;
-  }
+  
 
   async ensureLoggedIn(userId) {
-    // Retrieve tokens from the database
-    const activeUser = await this.User.findByPk(userId);
-    if (!activeUser) {
-      throw new Error('User not found');
-    }
-
     // Set the credentials for the oauth2Client using the stored tokens
     this.oauth2Client.setCredentials({
       access_token: activeUser.access_token,
@@ -92,5 +105,7 @@ class YoutubeAPI {
     }));
   }
 }
+
+router.get('/')
 
 module.exports = YoutubeAPI;
