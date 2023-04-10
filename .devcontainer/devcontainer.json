@@ -1,0 +1,5 @@
+{
+  "name": "YTHelper",
+  "dockerFile": "../Dockerfile",
+  "forwardPorts": [3000],
+}
