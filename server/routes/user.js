@@ -36,13 +36,14 @@ router.get('/logout', async (req, res) => {
   }
 });
 
-router.get('/oauth2callback', async (req, res) => {
-  const { code } = req.query;
+router.post('/oauth2callback', async (req, res) => {
+  const { code } = req.body;
   // await db.sync();
 
   try {
-    console.log(code)
-    const tokens = YoutubeAPI.authenticate(code);
+    // console.log(code)
+    const tokens = await YoutubeAPI.authenticate(code);
+    // console.log(tokens);
     const user = await ActiveUser.create({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
@@ -50,9 +51,8 @@ router.get('/oauth2callback', async (req, res) => {
       token_type: tokens.token_type,
       expiry_date: tokens.expiry_date,
     });
-
-    res.send("Authenticated successfully!");
-    console.log(user)
+    // console.log(user)
+    res.send({id: user.id});
   } catch (error) {
     res.send('Error: ' + error.message);
   }
