@@ -50,6 +50,63 @@ exports.authenticate = async (code) => {
   return tokens;
 }
 
+exports.ensureLoggedIn = async (userId) => {
+  console.log('ensureLoggedIn called (NOT IMPLEMENTED)');
+  return true;
+}
+
+exports.getChannelId = async () => {
+  const response = await youtube.channels.list({
+    part: 'id',
+    mine: true
+  });
+  return response.data.items[0].id;
+}
+
+exports.getAllVideos = async (userId) => {
+  try {
+    await this.ensureLoggedIn(userId);
+    
+    const channelId = await this.getChannelId();
+    const uploadsPlaylistId = await getUploadsPlaylistId(channelId);
+    const videoResults = [];
+    let nextPageToken = '';
+
+    do {
+      const response = await youtube.playlistItems.list({
+        part: 'snippet,contentDetails',
+        playlistId: uploadsPlaylistId,
+        maxResults: 50,
+        pageToken: nextPageToken
+      });
+
+      videoResults.push(...response.data.items);
+      nextPageToken = response.data.nextPageToken;
+    } while (nextPageToken);
+
+    return videoResults.map(item => ({
+      videoId: item.contentDetails.videoId,
+      title: item.snippet.title,
+      description: item.snippet.description,
+      publishedAt: item.snippet.publishedAt,
+      visibility: item.snippet.resourceId.kind === 'youtube#video' ? 'public' : 'private', // Assuming private if not a public video
+      thumbnailUrl: item.snippet.thumbnails.default.url
+    }));
+  } catch (error) {
+    console.error('Error getting all videos:', error.message);
+    return [];
+  }
+};
+
+// Get the uploads playlist ID for the given channel ID
+async function getUploadsPlaylistId(channelId) {
+  const response = await youtube.channels.list({
+    part: 'contentDetails',
+    id: channelId
+  });
+  return response.data.items[0].contentDetails.relatedPlaylists.uploads;
+}
+
 // class YoutubeAPI {
 //   constructor() {
     
@@ -80,13 +137,7 @@ exports.authenticate = async (code) => {
 //     }
 //   }
 
-//   async getChannelId() {
-//     const response = await this.youtube.channels.list({
-//       part: 'id',
-//       mine: true
-//     });
-//     return response.data.items[0].id;
-//   }
+  
 
 //   async getLatestUploads(count = 20) {
 //     const channelId = await this.getChannelId();

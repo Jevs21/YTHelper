@@ -1,8 +1,9 @@
 import { useGlobalContext } from "../global/store";
-import { Button, Stack, Typography } from  "@suid/material";
-import { createSignal, onMount, lazy } from "solid-js";
+import { Button, Stack, TextField, Typography } from  "@suid/material";
+import { createSignal, onMount, lazy, Show } from "solid-js";
 import { useParams, useSearchParams } from "@solidjs/router";
 import StagnantVideos from "../components/StagnantVideos";
+import VideoList from "../components/VideoList";
 
 const Index = () => {
   const { apiCall, navigate, uuid, setUuid } = useGlobalContext();
@@ -13,7 +14,7 @@ const Index = () => {
 
   const [spotifyUrl, setSpotifyUrl] = createSignal('');
 
-  const checkAuth = async () => (await apiCall('/user/is_logged', 'GET', { uuid: uuid() }));
+  const checkAuth = async () => (await apiCall('/user/is_logged', 'GET', { uuid: uuid() || "" }));
   const [isAuth, setIsAuth] = createSignal(false);
   onMount(async () => {
     if (localStorage.getItem('uuid')) {
@@ -69,7 +70,13 @@ const Index = () => {
 
 
       <Stack minHeight="100vh" width="80vw" spacing={3} overflow="scroll">
-        <Typography align="center" p={2} variant="h2" color="primary">Input</Typography>
+        <Show when={isAuth()} fallback={<Button onClick={async () => await authButton()}>Authenticate</Button>}>
+          <TextField value={spotifyUrl()} fullWidth label="Prompt" onChange={(event, value) => {
+            setSpotifyUrl(value);
+          }}/>
+
+          <VideoList />
+        </Show>
         {/* <Card>
           <Typography p={2} variant="body1" fontWeight={500} color="primary">Prompt Template</Typography>
           <FormControl fullWidth>
@@ -93,9 +100,7 @@ const Index = () => {
           </Show>
         </Card> */}
 
-        <TextField value={spotifyUrl()} fullWidth label="Prompt" onChange={(event, value) => {
-          setSpotifyUrl(value);
-        }}/>
+        
         {/* <TextField value={customContext()} fullWidth label="Context" onChange={(event, value) => {
           setCustomContext(value);
         }} /> */}

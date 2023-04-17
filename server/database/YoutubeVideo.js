@@ -4,6 +4,11 @@ class YoutubeVideo extends Model {
   static init(sequelize) {
     return super.init(
       {
+        videoId: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: true,
+        },
         title: {
           type: DataTypes.STRING,
           allowNull: false,
