@@ -4,6 +4,8 @@ import { createSignal, onMount, lazy, Show } from "solid-js";
 import { useParams, useSearchParams } from "@solidjs/router";
 import StagnantVideos from "../components/StagnantVideos";
 import VideoList from "../components/VideoList";
+import SpotifyDownload from "../components/SpotifyDownload";
+import LocalFiles from "../components/LocalFiles";
 
 const Index = () => {
   const { apiCall, navigate, uuid, setUuid } = useGlobalContext();
@@ -12,7 +14,7 @@ const Index = () => {
     window.open(res.url).focus();
   }
 
-  const [spotifyUrl, setSpotifyUrl] = createSignal('');
+  
 
   const checkAuth = async () => (await apiCall('/user/is_logged', 'GET', { uuid: uuid() || "" }));
   const [isAuth, setIsAuth] = createSignal(false);
@@ -39,18 +41,10 @@ const Index = () => {
 
     const res = await checkAuth();
     setIsAuth(res.authenticated);
-    // if (!res.authenticated) {
-    //   const redirect = await apiCall('/user/login');
-    //   window.open(redirect.url, '_blank').focus();
-    // }
 
     setInterval(async () => {
       const res = await checkAuth();
       setIsAuth(res.authenticated);
-      // if (!res.authenticated) {
-      //   const redirect = await apiCall('/user/login');
-      //   window.open(redirect.url, '_blank').focus();
-      // }
     }, 10000);
   });
 
@@ -71,11 +65,10 @@ const Index = () => {
 
       <Stack minHeight="100vh" width="80vw" spacing={3} overflow="scroll">
         <Show when={isAuth()} fallback={<Button onClick={async () => await authButton()}>Authenticate</Button>}>
-          <TextField value={spotifyUrl()} fullWidth label="Prompt" onChange={(event, value) => {
-            setSpotifyUrl(value);
-          }}/>
-
-          <VideoList />
+          
+          <SpotifyDownload />
+          <LocalFiles />
+          {/* <VideoList /> */}
         </Show>
         {/* <Card>
           <Typography p={2} variant="body1" fontWeight={500} color="primary">Prompt Template</Typography>

@@ -127,3 +127,7 @@ dist
 .pnp.*
 
 server/public/*
+server/output/raw/*
+server/output/audio/*
+server/output/video/*
+server/output/meta/*

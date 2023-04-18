@@ -18,8 +18,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/youtube', youtubeRoutes);
 const userRoutes = require('./routes/user');
 const videoRoutes = require('./routes/video');
+const spotifyRoutes = require('./routes/spotify');
+const localRoutes = require('./routes/local');
+const generatorRoutes = require('./routes/generator');
 app.use('/user', userRoutes);
 app.use('/video', videoRoutes);
+app.use('/spotify', spotifyRoutes);
+app.use('/local', localRoutes);
+app.use('/generator', generatorRoutes);
 
 // const { pollAnalytics } = require('./routes/cron');
 // cron.schedule('* * * * *', pollAnalytics);

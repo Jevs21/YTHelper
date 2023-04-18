@@ -6,17 +6,16 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "cors": "2.8.5",
-    "path": "^0.12.7",
-    "dotenv": "^8.2.0",
+    "fs": "^0.0.1-security",
     "googleapis": "^39.2.0",
-    "sqlite3":"5.1.6",
+    "node-cron": "3.0.2",
+    "path": "^0.12.7",
     "sequelize": "6.30.0",
-    "node-cron": "3.0.2"
-  },
-  "devDependencies": {
+    "spottydl": "^0.2.2",
+    "sqlite3": "5.1.6"
   }
 }
-  
