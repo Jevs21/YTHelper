@@ -6,6 +6,7 @@ import StagnantVideos from "../components/StagnantVideos";
 import VideoList from "../components/VideoList";
 import SpotifyDownload from "../components/SpotifyDownload";
 import LocalFiles from "../components/LocalFiles";
+import UploadSchedule from "../components/UploadSchedule";
 
 const Index = () => {
   const { apiCall, navigate, uuid, setUuid } = useGlobalContext();
@@ -68,7 +69,8 @@ const Index = () => {
           
           <SpotifyDownload />
           <LocalFiles />
-          {/* <VideoList /> */}
+          <UploadSchedule/>
+          <VideoList />
         </Show>
         {/* <Card>
           <Typography p={2} variant="body1" fontWeight={500} color="primary">Prompt Template</Typography>

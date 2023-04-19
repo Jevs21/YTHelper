@@ -65,9 +65,9 @@ router.post('/oauth2callback', async (req, res) => {
         // Update the video if it has changed
         if (dbVideo.title !== video.title ||
             dbVideo.description !== video.description ||
-            // dbVideo.publishedAt !== video.publishedAt ||
+            dbVideo.publishedAt !== video.publishedAt ||
             dbVideo.thumbnailUrl !== video.thumbnailUrl) {
-              console.log("Video has changed. Updating it.")
+              // console.log("Video has changed. Updating it.")
               // Console log all the changes
               if (dbVideo.title !== video.title) {
                 console.log("Title has changed from " + dbVideo.title + " to " + video.title)
@@ -75,9 +75,9 @@ router.post('/oauth2callback', async (req, res) => {
               if (dbVideo.description !== video.description) {
                 console.log("Description has changed from " + dbVideo.description + " to " + video.description)
               }
-              // if (dbVideo.publishedAt !== video.publishedAt) {
-              //   console.log("PublishedAt has changed from " + dbVideo.publishedAt + " to " + video.publishedAt)
-              // }
+              if (dbVideo.publishedAt !== video.publishedAt) {
+                console.log("PublishedAt has changed from " + dbVideo.publishedAt + " to " + video.publishedAt)
+              }
               if (dbVideo.thumbnailUrl !== video.thumbnailUrl) {
                 console.log("ThumbnailUrl has changed from " + dbVideo.thumbnailUrl + " to " + video.thumbnailUrl)
               }
@@ -88,11 +88,12 @@ router.post('/oauth2callback', async (req, res) => {
               dbVideo.thumbnailUrl = video.thumbnailUrl;
               await dbVideo.save();
         } else {
-          console.log("Video has not changed. Skipping it.")
+          // console.log("Video has not changed. Skipping it.")
         }
       } else {
         console.log("Video does not exist in database. Adding it.")
         // Add the video to the database\
+        // console.log(video);
         try {
           await YoutubeVideo.create({
             videoId: video.videoId,
@@ -102,13 +103,14 @@ router.post('/oauth2callback', async (req, res) => {
             thumbnailUrl: video.thumbnailUrl,
           });
         } catch (error) {
-          console.log("ERROR: " + error.name);
+          console.log("\nERROR: " + error.name);
+          console.log(error);
         }
         
       }
     }
 
-
+    console.log("Finished updating videos!")
     res.send({id: user.id});
   } catch (error) {
     console.log(error);

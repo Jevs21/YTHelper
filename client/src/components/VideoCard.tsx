@@ -18,6 +18,7 @@ const VideoCard = (props) => {
           }}/>
           <Typography align="center" p={1}>{video.title}</Typography>
           <Typography variant="body2"p={1}>{video.description}</Typography>
+          <Typography variant="body2"p={1}>{video.publishedAt}</Typography>
 
         </Stack>
       </Card>

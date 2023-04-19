@@ -33,4 +33,34 @@ router.get('/audio', async (req, res) => {
   }
 });
 
+
+router.get('/video', async (req, res) => {
+  const scriptPath = path.join(__dirname, '..', 'python', 'video.py');
+  const audioPath = path.join(__dirname, '..', 'output', 'audio');
+  const gifPath = path.join(__dirname, '..', 'output', 'gifs');
+  const outPath = path.join(__dirname, '..', 'output', 'video');
+  console.log("Running script: " + scriptPath)
+  try {
+    const pythonProcess = spawn('python3', [scriptPath, audioPath, gifPath, outPath]);
+    pythonProcess.stdout.on('data', (data) => {
+      console.log(`Python stdout: ${data}`);
+    });
+  
+    pythonProcess.stderr.on('data', (data) => {
+      console.error(`Python stderr: ${data}`);
+    });
+    pythonProcess.on('exit', (code) => {
+      console.log(`Python script exited with code ${code}`);
+      if (code === 0) {
+        res.status(200).json({ message: 'Python script completed successfully' });
+      } else {
+        res.status(500).json({ message: 'Python script failed', error: code });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
 module.exports = router;

@@ -63,40 +63,165 @@ exports.getChannelId = async () => {
   return response.data.items[0].id;
 }
 
+async function getUploadedVideos(uploadsPlaylistId) {
+  console.log("Getting uploaded videos...");
+  const videoResults = [];
+  let nextPageToken = '';
+
+  do {
+    const response = await youtube.playlistItems.list({
+      part: 'snippet,contentDetails,status',
+      playlistId: uploadsPlaylistId,
+      maxResults: 50,
+      pageToken: nextPageToken
+    });
+    // console.log(response.data.items);
+    const vidIdString = response.data.items.map(item => item.contentDetails.videoId).join(',');
+    const videoResponse = await youtube.videos.list({
+      part: 'snippet,contentDetails,status',
+      id: vidIdString
+    });
+
+    videoResults.push(...videoResponse.data.items);
+    nextPageToken = response.data.nextPageToken;
+  } while (nextPageToken);
+
+  return videoResults.map(item => {
+    // console.log("Snippet Published at: " + item.snippet.publishedAt + " ContentDetails Published at: " + item.contentDetails.videoPublishedAt);
+    // console.log(item.status);
+    // if (item.status.privacyStatus === 'private') {
+    //   if ('publishAt' in item.status) {
+    //     console.log(item.status.publishAt);
+    //   }
+    // }
+    // console.log(item)
+    let video = item.snippet;
+    video.id = item.id;
+    video.status = item.status.privacyStatus;
+    video.publishedAt = (video.status === 'private' && 'publishAt' in item.status) ? item.status.publishAt : item.snippet.publishedAt;
+    video.thumbnail = item.snippet.thumbnails.default.url;
+    // console.log(video)
+    return video;
+  });
+}
+
+async function getScheduledVideos(channelId) {
+  console.log("Getting scheduled videos...");
+  const videoResults = [];
+  let nextPageToken = '';
+
+  do {
+    const response = await youtube.search.list({
+      part: 'snippet',
+      channelId: channelId,
+      maxResults: 50,
+      pageToken: nextPageToken,
+      eventType: 'upcoming',
+      type: 'video'
+    });
+
+    videoResults.push(...response.data.items);
+    nextPageToken = response.data.nextPageToken;
+  } while (nextPageToken);
+
+  const videoIds = videoResults.map(item => item.id.videoId).join(',');
+  const videosResponse = await youtube.videos.list({
+    part: 'snippet,status',
+    id: videoIds
+  });
+
+  return videosResponse.data.items;
+}
+
 exports.getAllVideos = async (userId) => {
   try {
     await this.ensureLoggedIn(userId);
-    
+
     const channelId = await this.getChannelId();
     const uploadsPlaylistId = await getUploadsPlaylistId(channelId);
-    const videoResults = [];
-    let nextPageToken = '';
+    const uploadedVideoResults = await getUploadedVideos(uploadsPlaylistId);
+    // const scheduledVideoResults = await getScheduledVideos(channelId);
 
-    do {
-      const response = await youtube.playlistItems.list({
-        part: 'snippet,contentDetails',
-        playlistId: uploadsPlaylistId,
-        maxResults: 50,
-        pageToken: nextPageToken
-      });
+    const allVideos = [...uploadedVideoResults];
+    // const allVideos = [...uploadedVideoResults, ...scheduledVideoResults];
 
-      videoResults.push(...response.data.items);
-      nextPageToken = response.data.nextPageToken;
-    } while (nextPageToken);
-
-    return videoResults.map(item => ({
-      videoId: item.contentDetails.videoId,
-      title: item.snippet.title,
-      description: item.snippet.description,
-      publishedAt: item.snippet.publishedAt,
-      visibility: item.snippet.resourceId.kind === 'youtube#video' ? 'public' : 'private', // Assuming private if not a public video
-      thumbnailUrl: item.snippet.thumbnails.default.url
+    return allVideos.map(item => ({
+      videoId: item.id,
+      title: item.title,
+      description: item.description,
+      publishedAt: item.publishedAt,
+      visibility: item.status,
+      thumbnailUrl: item.thumbnail
     }));
   } catch (error) {
     console.error('Error getting all videos:', error.message);
     return [];
   }
 };
+
+// exports.getAllVideos = async (userId) => {
+//   try {
+//     await this.ensureLoggedIn(userId);
+    
+//     const channelId = await this.getChannelId();
+//     const uploadsPlaylistId = await getUploadsPlaylistId(channelId);
+//     const videoResults = [];
+//     let nextPageToken = '';
+
+//     do {
+//       const response = await youtube.playlistItems.list({
+//         part: 'snippet,contentDetails,status',
+//         playlistId: uploadsPlaylistId,
+//         maxResults: 50,
+//         pageToken: nextPageToken
+//       });
+//       // if (response.data.items.length > 0) {
+//       //   console.log(response.data.items[0])  
+//       // }
+      
+
+//       videoResults.push(...response.data.items);
+//       nextPageToken = response.data.nextPageToken;
+//     } while (nextPageToken);
+
+//     // Get scheduled videos
+//     let nextPageTokenScheduled = '';
+//     const scheduledVideoResults = [];
+//     do {
+//       const responseScheduled = await youtube.videos.list({
+//         part: 'snippet,contentDetails,status',
+//         channelId: channelId,
+//         maxResults: 50,
+//         pageToken: nextPageTokenScheduled
+//       });
+//       console.log(responseScheduled.data.items)
+
+//       scheduledVideoResults.push(...responseScheduled.data.items.filter(item => {
+//         const status = item.snippet.liveBroadcastContent;
+//         const scheduledDate = new Date(item.snippet.publishedAt);
+//         return status === 'upcoming' && scheduledDate > new Date();
+//       }));
+//       nextPageTokenScheduled = responseScheduled.data.nextPageToken;
+//     } while (nextPageTokenScheduled);
+
+//     // Combine uploaded and scheduled videos
+//     // const combinedResults = videoResults.concat(scheduledVideoResults);
+
+//     return combinedResults.map(item => ({
+//       videoId: item.id.videoId || item.contentDetails.videoId,
+//       title: item.snippet.title,
+//       description: item.snippet.description,
+//       publishedAt: item.status.publishAt,
+//       visibility: item.snippet.resourceId?.kind === 'youtube#video' || item.id.kind === 'youtube#video' ? 'public' : 'private',
+//       thumbnailUrl: item.snippet.thumbnails.default.url
+//     }));
+//   } catch (error) {
+//     console.error('Error getting all videos:', error.message);
+//     return [];
+//   }
+// };
+
+
 
 // Get the uploads playlist ID for the given channel ID
 async function getUploadsPlaylistId(channelId) {
