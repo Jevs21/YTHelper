@@ -126,6 +126,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+client/build
 server/public/*
 server/output/raw/*
 server/output/audio/*

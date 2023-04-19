@@ -11,8 +11,8 @@ const SubFileListTitle = (props) => (
 const SubFileList = (props) => (
   <Stack spacing={1} paddingBottom={2}>
     <Show when={props.list.length > 0} fallback={<Typography>No files!</Typography>}>
-      <For each={props.list}>{(file) =>
-        <Typography>{file.name}</Typography>
+      <For each={props.list}>{(file, i) =>
+        <Typography>{i() + 1} - {file.name}</Typography>
       }</For>
     </Show>
   </Stack>
@@ -33,6 +33,7 @@ const UploadButton = (props) => {
     const res = await apiCall("/video/upload", "POST", {}, { file: props.file });
     console.log(res);
     setIsUploading(false);
+    setOpen(false);
   }
   return (
     <>

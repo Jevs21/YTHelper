@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 const YoutubeAPI = require('./youtube');
 const { YoutubeVideo } = require('../database/db');
@@ -238,8 +239,9 @@ router.post('/upload', async (req, res) => {
   const audioPath = path.join(__dirname, '..', 'output', 'audio', file + '.mp3');
   const rawPath = path.join(__dirname, '..', 'output', 'raw', file + '.mp3');
   const vidPath = path.join(__dirname, '..', 'output', 'video', file + '.mp4');
-  const schedule = await getUploadSchedule();
-  const meta = generateMeta(require(metaPath), schedule);
+  
+  let meta = generateMeta(require(metaPath));
+  meta.publish = await getNextUploadTime();
   console.log("Uploading");
 
   try {

@@ -18,7 +18,7 @@ interface ContextProps {
 const GlobalContext = createContext<ContextProps>();
 
 export function GlobalContextProvider(props) {
-  const server_url = "http://192.168.2.93:3000";
+  const server_url = "http://192.168.2.97:3000";
 
   const navigateFunc = useNavigate();
   const location = useLocation();

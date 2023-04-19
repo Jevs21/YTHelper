@@ -15,7 +15,9 @@
     "node-cron": "3.0.2",
     "path": "^0.12.7",
     "sequelize": "6.30.0",
-    "spottydl": "^0.2.2",
-    "sqlite3": "5.1.6"
+    "spottydl": "^0.2.2"
+  },
+  "devDependencies": {
+    "sqlite3": "^5.1.6"
   }
 }
