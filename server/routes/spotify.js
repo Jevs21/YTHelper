@@ -18,7 +18,17 @@ function renameFilesInDirectory(directoryPath, tracks) {
 
     files.forEach((file) => {
       const oldPath = path.join(directoryPath, file);
-      const newFilename = tracks.find((track) => track.title === file.split(".")[0]).id + '.mp3';
+      const t = tracks.find((track) => track.title === file.split(".")[0]);
+      if (t === undefined) {
+        console.log("Could not find track for file: " + file);
+        return;
+      }
+
+      const newFilename = t.id + '.mp3';
+      if (newFilename === undefined) {
+        console.log("Could not find track for file: " + file);
+        return;
+      }
       const newPath = path.join(directoryPath, newFilename);
 
       fs.rename(oldPath, newPath, (err) => {

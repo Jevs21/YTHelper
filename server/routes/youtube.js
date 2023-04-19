@@ -1,6 +1,4 @@
-const express = require('express');
-const router = express.Router();
-
+const fs = require('fs');
 const dotenv = require('dotenv');
 dotenv.config();
 const { google } = require('googleapis');
@@ -105,34 +103,6 @@ async function getUploadedVideos(uploadsPlaylistId) {
   });
 }
 
-async function getScheduledVideos(channelId) {
-  console.log("Getting scheduled videos...");
-  const videoResults = [];
-  let nextPageToken = '';
-
-  do {
-    const response = await youtube.search.list({
-      part: 'snippet',
-      channelId: channelId,
-      maxResults: 50,
-      pageToken: nextPageToken,
-      eventType: 'upcoming',
-      type: 'video'
-    });
-
-    videoResults.push(...response.data.items);
-    nextPageToken = response.data.nextPageToken;
-  } while (nextPageToken);
-
-  const videoIds = videoResults.map(item => item.id.videoId).join(',');
-  const videosResponse = await youtube.videos.list({
-    part: 'snippet,status',
-    id: videoIds
-  });
-
-  return videosResponse.data.items;
-}
-
 exports.getAllVideos = async (userId) => {
   try {
     await this.ensureLoggedIn(userId);
@@ -159,67 +129,92 @@ exports.getAllVideos = async (userId) => {
   }
 };
 
-// exports.getAllVideos = async (userId) => {
-//   try {
-//     await this.ensureLoggedIn(userId);
-    
-//     const channelId = await this.getChannelId();
-//     const uploadsPlaylistId = await getUploadsPlaylistId(channelId);
-//     const videoResults = [];
-//     let nextPageToken = '';
 
-//     do {
-//       const response = await youtube.playlistItems.list({
-//         part: 'snippet,contentDetails,status',
-//         playlistId: uploadsPlaylistId,
-//         maxResults: 50,
-//         pageToken: nextPageToken
-//       });
-//       // if (response.data.items.length > 0) {
-//       //   console.log(response.data.items[0])  
-//       // }
-      
+exports.uploadVideo = async (metadata, videoFilePath) => {
+  try {
+    await this.ensureLoggedIn();
 
-//       videoResults.push(...response.data.items);
-//       nextPageToken = response.data.nextPageToken;
-//     } while (nextPageToken);
+    const videoFile = fs.createReadStream(videoFilePath);
+    const fileSize = fs.statSync(videoFilePath).size;
 
-//     // Get scheduled videos
-//     let nextPageTokenScheduled = '';
-//     const scheduledVideoResults = [];
-//     do {
-//       const responseScheduled = await youtube.videos.list({
-//         part: 'snippet,contentDetails,status',
-//         channelId: channelId,
-//         maxResults: 50,
-//         pageToken: nextPageTokenScheduled
-//       });
-//       console.log(responseScheduled.data.items)
+    // Upload video
+    const uploadRequest = await youtube.videos.insert(
+      {
+        part: 'snippet,status',
+        requestBody: {
+          snippet: {
+            title: metadata.title,
+            description: metadata.description,
+            tags: metadata.tags,
+            categoryId: '10',
+          },
+          status: {
+            privacyStatus: 'private',
+            publishAt: metadata.publish,
+          },
+        },
+        media: {
+          mimeType: 'video/mp4',
+          body: videoFile,
+        },
+      },
+      {
+        maxBodyLength: fileSize,
+        maxContentLength: fileSize,
+      },
+    );
 
-//       scheduledVideoResults.push(...responseScheduled.data.items.filter(item => {
-//         const status = item.snippet.liveBroadcastContent;
-//         const scheduledDate = new Date(item.snippet.publishedAt);
-//         return status === 'upcoming' && scheduledDate > new Date();
-//       }));
-//       nextPageTokenScheduled = responseScheduled.data.nextPageToken;
-//     } while (nextPageTokenScheduled);
+    const videoId = uploadRequest.data.id;
+    console.log('Video uploaded with ID:', videoId);
 
-//     // Combine uploaded and scheduled videos
-//     // const combinedResults = videoResults.concat(scheduledVideoResults);
+    // Set thumbnail
+    if (metadata.thumbnailPath) {
+      const thumbnail = fs.createReadStream(metadata.thumbnailPath);
+      await youtube.thumbnails.set({
+        videoId: videoId,
+        media: {
+          mimeType: 'image/jpeg',
+          body: thumbnail,
+        },
+      });
+      console.log('Thumbnail set for video', videoId);
+    }
 
-//     return combinedResults.map(item => ({
-//       videoId: item.id.videoId || item.contentDetails.videoId,
-//       title: item.snippet.title,
-//       description: item.snippet.description,
-//       publishedAt: item.status.publishAt,
-//       visibility: item.snippet.resourceId?.kind === 'youtube#video' || item.id.kind === 'youtube#video' ? 'public' : 'private',
-//       thumbnailUrl: item.snippet.thumbnails.default.url
-//     }));
-//   } catch (error) {
-//     console.error('Error getting all videos:', error.message);
-//     return [];
-//   }
-// };
+    return videoId;
+  } catch (error) {
+    console.error('Error uploading video:', error.message);
+    return null;
+  }
+};
+
+exports.updateVideoPublishDate = async (video, publishDate) => {
+  try {
+    await this.ensureLoggedIn();
+
+    const response = await youtube.videos.update({
+      part: 'snippet,status',
+      requestBody: {
+        id: video.videoId,
+        snippet: {
+          title: video.title,
+          description: video.description,
+          categoryId: '10',
+          publishedAt: publishDate
+        },
+        status: {
+          privacyStatus: 'private',
+          publishAt: publishDate
+        }
+      }
+    });
+
+    console.log('Video publish date updated:', video.videoId);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating video publish date:', error.message);
+    return null;
+  }
+};
 
 
 
@@ -231,57 +226,3 @@ async function getUploadsPlaylistId(channelId) {
   });
   return response.data.items[0].contentDetails.relatedPlaylists.uploads;
 }
-
-// class YoutubeAPI {
-//   constructor() {
-    
-//   }
-
-  
-
-//   async ensureLoggedIn(userId) {
-//     // Set the credentials for the oauth2Client using the stored tokens
-//     this.oauth2Client.setCredentials({
-//       access_token: activeUser.access_token,
-//       refresh_token: activeUser.refresh_token,
-//       scope: activeUser.scope,
-//       token_type: activeUser.token_type,
-//       expiry_date: activeUser.expiry_date,
-//     });
-
-//     // Check if the access token is expired
-//     if (this.oauth2Client.isTokenExpired()) {
-//       // Refresh the access token
-//       const refreshedTokens = await this.oauth2Client.refreshAccessToken();
-//       const newTokens = refreshedTokens.res.data;
-
-//       // Update the stored tokens in the database
-//       activeUser.access_token = newTokens.access_token;
-//       activeUser.expiry_date = newTokens.expiry_date;
-//       await activeUser.save();
-//     }
-//   }
-
-  
-
-//   async getLatestUploads(count = 20) {
-//     const channelId = await this.getChannelId();
-//     const response = await this.youtube.search.list({
-//       part: 'snippet',
-//       channelId: channelId,
-//       maxResults: count,
-//       order: 'date',
-//       type: 'video'
-//     });
-//     return response.data.items.map(item => ({
-//       videoId: item.id.videoId,
-//       title: item.snippet.title,
-//       description: item.snippet.description,
-//       publishedAt: item.snippet.publishedAt
-//     }));
-//   }
-// }
-
-// router.get('/')
-
-// module.exports = YoutubeAPI;

@@ -1,6 +1,8 @@
-import { Button, CircularProgress, Stack, TextField, Typography } from "@suid/material";
+import { CircularProgress, Stack, TextField, Typography } from "@suid/material";
 import { Show, createSignal } from "solid-js";
 import { useGlobalContext } from "../global/store";
+import ButtonEl from "./ButtonEl";
+import StackRowCentered from "./StackRowCentered";
 
 const SpotifyDownload = (props) => {
   const { apiCall } = useGlobalContext();
@@ -14,18 +16,16 @@ const SpotifyDownload = (props) => {
   }
 
   return (
-    <Stack>
-      <TextField value={spotifyUrl()}  label="Prompt" onChange={(event, value) => {
+    <StackRowCentered spacing={1}>
+      <TextField fullWidth value={spotifyUrl()}  label="Spotify Playlist URL" onChange={(event, value) => {
         setSpotifyUrl(value);
       }}/>
       <Show when={!isDownloading()} fallback={<CircularProgress color="success" />}>
-        <Button 
-          fullWidth 
-          variant="outlined" 
+        <ButtonEl 
           onClick={downloadUrl} 
-          disabled={isDownloading() || spotifyUrl().length == 0}>Download</Button>
+          disabled={isDownloading() || spotifyUrl().length == 0}>Download</ButtonEl>
       </Show>
-    </Stack>
+    </StackRowCentered>
     
   )
 }
