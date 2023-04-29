@@ -49,9 +49,9 @@ function getTimePeriod(a, b) {
 
   const hourA = dateA.getHours();
 
-  if (hourA >= 5 && hourA < 10) {
+  if (hourA >= 5 && hourA < 13) {
     return 1;
-  } else if (hourA >= 10 && hourA < 17) {
+  } else if (hourA >= 13 && hourA < 21) {
     return 2;
   } else {
     return 3;
@@ -118,15 +118,15 @@ async function getNextUploadTime() {
   for(let i = 1; i < schedule.length; i++) {
     const day = schedule[i];
     if (day.schedule[0] === 0) {
-      pub = new Date(day.date + "T09:00:00.000Z");
+      pub = new Date(day.date + "T12:00:00.000Z");
       break;
     } 
     else if (day.schedule[1] === 0) {
-      pub = new Date(day.date + "T12:00:00.000Z");
+      pub = new Date(day.date + "T16:00:00.000Z");
       break;
     }
     else if (day.schedule[2] === 0) {
-      pub = new Date(day.date + "T19:00:00.000Z");
+      pub = new Date(day.date + "T23:00:00.000Z");
       break;
     }
   }

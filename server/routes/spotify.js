@@ -70,12 +70,20 @@ router.get('/getPlaylist', async (req, res) => {
       }
 
       console.log("Got playlist. Downloading...");
-      const playlist = await SpottyDL.downloadPlaylist(results, outDir)
-      console.log(playlist)
-      console.log("Downloaded playlist. Renaming files...");
-      renameFilesInDirectory(outDir, results.tracks);
-      res.send(playlist);
-      return;
+      try {
+        const playlist = await SpottyDL.downloadPlaylist(results, outDir)
+        console.log(playlist)
+        console.log("Downloaded playlist. Renaming files...");
+        renameFilesInDirectory(outDir, results.tracks);
+        res.send(playlist);
+        return;
+      }
+      catch (e) {
+        console.log("Playlist Download Error!")
+        console.log(e);
+        res.status(500).send(err);
+        return;
+      }
     }
   } catch (err) {
     console.log(err);
