@@ -132,3 +132,4 @@ server/output/raw/*
 server/output/audio/*
 server/output/video/*
 server/output/meta/*
+server/output/fullmeta/*

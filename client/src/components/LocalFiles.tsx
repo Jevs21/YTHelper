@@ -85,6 +85,26 @@ const UploadButton = (props) => {
   )
 }
 
+const CompressLocal = (props) => {
+  const { apiCall } = useGlobalContext();
+  const [isCompressing, setIsCompressing] = createSignal(false);
+  const compressLocalFiles = async () => {
+    setIsCompressing(true);
+    const resp = await apiCall('/local/compress');
+    if (!resp.success) {
+      console.log("Error compressing");
+    }
+    setIsCompressing(false);
+  }
+  return (
+    <StackRowCentered>
+      <Show when={!isCompressing()} fallback={<CircularProgress/>}>
+        <ButtonEl onClick={compressLocalFiles}>Compress Local Files</ButtonEl>
+      </Show>
+    </StackRowCentered>
+  )
+}
+
 const LocalFiles = (props) => {
   const { apiCall } = useGlobalContext();
   const fetchFiles = async () => await apiCall('/local/list/');
@@ -175,6 +195,9 @@ const LocalFiles = (props) => {
       </Card>
 
       <Stack spacing={1}>
+        <Show when={readyForUpload().length > 0}>
+          <CompressLocal />
+        </Show>
         <For each={readyForUpload()}>{(file) =>
           <UploadButton file={file} />
         }</For>

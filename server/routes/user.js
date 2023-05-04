@@ -14,11 +14,19 @@ router.get('/is_logged', async (req, res) => {
   const { uuid } = req.query;
   try {
     const user = await ActiveUser.findOne({ where: { id: uuid } });
-    if (user) {
-      res.send({authenticated: true});
-    } else {
-      res.send({authenticated: false});
+
+    if (!user) {
+      throw new Error('User not found');
     }
+
+    // await YoutubeAPI.refreshAccessToken(user);
+    // const user = await ActiveUser.findOne({ where: { id: uuid } });
+    // if (user) {
+    res.send({authenticated: true});
+    // } else {
+    //   res.send({authenticated: false});
+    // }
+    // console.log(res)
   } catch (error) {
     console.log(error);
     res.send({authenticated: false});

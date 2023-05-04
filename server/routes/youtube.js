@@ -61,6 +61,35 @@ exports.getChannelId = async () => {
   return response.data.items[0].id;
 }
 
+exports.refreshAccessToken = async (user) => {
+  try {
+    // Find the user in the database
+
+    // Set the user's refresh token in the OAuth2 client
+    oauth2Client.setCredentials({
+      refresh_token: user.refresh_token,
+    });
+
+    // Request a new access token
+    const accessToken = await oauth2Client.getAccessToken();
+
+    // Check if the access token has changed
+    if (accessToken.token !== user.access_token) {
+      // Update the user's access token and expiry date in the database
+      await user.update({
+        access_token: accessToken.token,
+        expiry_date: accessToken.expiry_date,
+      });
+      console.log('Access token refreshed');
+    } else {
+      console.log('Access token is still valid');
+    }
+
+  } catch (error) {
+    console.error('Failed to refresh access token:', error);
+  }
+}
+
 async function getUploadedVideos(uploadsPlaylistId) {
   console.log("Getting uploaded videos...");
   const videoResults = [];
