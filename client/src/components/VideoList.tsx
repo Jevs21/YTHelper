@@ -3,14 +3,7 @@ import { useGlobalContext } from "../global/store";
 import { Grid, Stack } from "@suid/material";
 import VideoCard from "./VideoCard";
 
-interface Video {
-  id: number;
-  videoId: string;
-  title: string;
-  description: string;
-  thumbnailUrl: string;
-  publishedAt: string;
-}
+
 
 const VideoList = (props) => {
   const {apiCall} = useGlobalContext();

@@ -42,8 +42,8 @@ const VideoCard = (props) => {
               "height": "auto"
             }}/>
             <Typography align="center" variant="h3" p={1}>{video.title}</Typography>
-            <Typography variant="body2"p={1}>{video.publishedAt}</Typography>
-
+            <Typography variant="body2" p={1}>{video.publishedAt}</Typography>
+            <Typography variant="body2" p={1}>{video.views}</Typography>
           </Stack>
         </Card>
       </Box>

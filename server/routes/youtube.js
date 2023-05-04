@@ -245,6 +245,23 @@ exports.updateVideoPublishDate = async (video, publishDate) => {
   }
 };
 
+exports.getVideoViewCount = async (videoId) => {
+  try {
+    const response = await youtube.videos.list({
+      part: 'statistics',
+      id: videoId
+    });
+
+    if (response.data.items.length === 0) {
+      throw new Error('Video not found');
+    }
+
+    return response.data.items[0].statistics.viewCount;
+  } catch (error) {
+    console.error('Error getting video view count:', error.message);
+    return null;
+  }
+};
 
 
 // Get the uploads playlist ID for the given channel ID

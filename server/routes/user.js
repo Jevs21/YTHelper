@@ -69,31 +69,37 @@ router.post('/oauth2callback', async (req, res) => {
       console.log("Updating video " + i)
       const video = videos[i];
       const dbVideo = dbVids.find(dbVideo => dbVideo.videoId === video.videoId);
+      const videoViews = await YoutubeAPI.getVideoViewCount(video.videoId);
       if (dbVideo) {
         // Update the video if it has changed
         if (dbVideo.title !== video.title ||
             dbVideo.description !== video.description ||
             dbVideo.publishedAt !== video.publishedAt ||
+            dbVideo.views       !== videoViews       ||
             dbVideo.thumbnailUrl !== video.thumbnailUrl) {
               // console.log("Video has changed. Updating it.")
               // Console log all the changes
               if (dbVideo.title !== video.title) {
                 console.log("Title has changed from " + dbVideo.title + " to " + video.title)
+                dbVideo.title = video.title;
               }
               if (dbVideo.description !== video.description) {
                 console.log("Description has changed from " + dbVideo.description + " to " + video.description)
+                dbVideo.description = video.description;
               }
               if (dbVideo.publishedAt !== video.publishedAt) {
                 console.log("PublishedAt has changed from " + dbVideo.publishedAt + " to " + video.publishedAt)
+                dbVideo.publishedAt = video.publishedAt;
               }
               if (dbVideo.thumbnailUrl !== video.thumbnailUrl) {
                 console.log("ThumbnailUrl has changed from " + dbVideo.thumbnailUrl + " to " + video.thumbnailUrl)
+                dbVideo.thumbnailUrl = video.thumbnailUrl;
+              }
+              if (dbVideo.views !== videoViews) {
+                console.log("Views has changed from " + dbVideo.veiws + " to " + videoViews)
+                dbVideo.views = videoViews;
               }
               
-              dbVideo.title = video.title;
-              dbVideo.description = video.description;
-              dbVideo.publishedAt = video.publishedAt;
-              dbVideo.thumbnailUrl = video.thumbnailUrl;
               await dbVideo.save();
         } else {
           // console.log("Video has not changed. Skipping it.")
@@ -108,6 +114,7 @@ router.post('/oauth2callback', async (req, res) => {
             title: video.title,
             description: video.description,
             publishedAt: video.publishedAt,
+            views: videoViews,
             thumbnailUrl: video.thumbnailUrl,
           });
         } catch (error) {

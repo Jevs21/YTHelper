@@ -7,6 +7,7 @@ import VideoList from "../components/VideoList";
 import SpotifyDownload from "../components/SpotifyDownload";
 import LocalFiles from "../components/LocalFiles";
 import UploadSchedule from "../components/UploadSchedule";
+import VideoSearch from "../components/VideoSearch";
 
 const Index = () => {
   const { apiCall, navigate, uuid, setUuid } = useGlobalContext();
@@ -66,7 +67,7 @@ const Index = () => {
 
       <Stack minHeight="100vh" width="80vw" spacing={3} overflow="scroll">
         <Show when={isAuth()} fallback={<Button onClick={async () => await authButton()}>Authenticate</Button>}>
-          
+          <VideoSearch />
           <SpotifyDownload />
           <LocalFiles />
           <UploadSchedule/>

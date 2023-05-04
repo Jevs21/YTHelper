@@ -21,6 +21,10 @@ class YoutubeVideo extends Model {
           type: DataTypes.DATE,
           allowNull: false,
         },
+        views: {
+          type: DataTypes.INTEGER,
+          defaultValue: 0,
+        },
         thumbnailUrl: {
           type: DataTypes.STRING,
           allowNull: false,
